@@ -31,7 +31,7 @@ export class WorkshopPipelineStack extends cdk.Stack {
 				sourceArtifact,
 				cloudAssemblyArtifact,
 				buildCommand: "npm run build",
-				synthCommand: "cdk synth --context stageName=dev"
+				synthCommand: "npx cdk synth --context stageName=dev"
 			})
 		});
 
@@ -58,7 +58,7 @@ export class WorkshopPipelineStack extends cdk.Stack {
 				sourceArtifact,
 				cloudAssemblyArtifact,
 				buildCommand: "npm run build",
-				synthCommand: "cdk synth --context stageName=prod"
+				synthCommand: "npx cdk synth --context stageName=prod"
 			})
 		});
 
