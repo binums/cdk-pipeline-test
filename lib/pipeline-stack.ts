@@ -3,6 +3,7 @@ import * as codepipeline from "@aws-cdk/aws-codepipeline";
 import * as codepipeline_actions from "@aws-cdk/aws-codepipeline-actions";
 import { CdkPipeline, SimpleSynthAction } from "@aws-cdk/pipelines";
 import { SecretValue } from "@aws-cdk/core";
+import { WorkshopPipelineStage } from "./pipeline-satge";
 
 export class WorkshopPipelineStack extends cdk.Stack {
 	constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -11,7 +12,7 @@ export class WorkshopPipelineStack extends cdk.Stack {
 		const sourceArtifact = new codepipeline.Artifact();
 		const cloudAssemblyArtifact = new codepipeline.Artifact();
 
-		new CdkPipeline(this, "Pipeline", {
+		const pipeline = new CdkPipeline(this, "Pipeline", {
 			pipelineName: "WorkshopPipeline",
 			cloudAssemblyArtifact,
 
@@ -32,5 +33,9 @@ export class WorkshopPipelineStack extends cdk.Stack {
 				buildCommand: "npm run build"
 			})
 		});
+
+		const deploy = new WorkshopPipelineStage(this, "Deploy");
+
+		pipeline.addApplicationStage(deploy);
 	}
 }

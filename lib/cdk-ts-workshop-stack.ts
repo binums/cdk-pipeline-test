@@ -5,7 +5,7 @@ import { HitCounter } from "./hitCounter";
 import { TableViewer } from "cdk-dynamo-table-viewer";
 
 export class CdkTsWorkshopStack extends cdk.Stack {
-	constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+	constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
 		const hello = new lambda.Function(this, "HelloHandler", {
