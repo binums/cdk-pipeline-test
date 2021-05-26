@@ -12,8 +12,35 @@ export class WorkshopPipelineStack extends cdk.Stack {
 		const sourceArtifact = new codepipeline.Artifact();
 		const cloudAssemblyArtifact = new codepipeline.Artifact();
 
-		const pipeline = new CdkPipeline(this, "Pipeline", {
-			pipelineName: "WorkshopPipeline",
+		const pipelineDev = new CdkPipeline(this, "PipelineDev", {
+			pipelineName: "WorkshopPipelineDev",
+			cloudAssemblyArtifact,
+
+			sourceAction: new codepipeline_actions.GitHubSourceAction({
+				actionName: "GitHub",
+				output: sourceArtifact,
+				oauthToken: SecretValue.secretsManager(
+					"CDK-Pipeline-test-github-token"
+				),
+				branch: "dev",
+				owner: "binums",
+				repo: "cdk-pipeline-test"
+			}),
+
+			synthAction: SimpleSynthAction.standardNpmSynth({
+				sourceArtifact,
+				cloudAssemblyArtifact,
+				buildCommand: "npm run build",
+				synthCommand: "cdk synth --context stageName=dev"
+			})
+		});
+
+		const deployDev = new WorkshopPipelineStage(this, "DeployDev");
+
+		pipelineDev.addApplicationStage(deployDev);
+
+		const pipelineProd = new CdkPipeline(this, "PipelineProd", {
+			pipelineName: "WorkshopPipelineProd",
 			cloudAssemblyArtifact,
 
 			sourceAction: new codepipeline_actions.GitHubSourceAction({
@@ -30,12 +57,13 @@ export class WorkshopPipelineStack extends cdk.Stack {
 			synthAction: SimpleSynthAction.standardNpmSynth({
 				sourceArtifact,
 				cloudAssemblyArtifact,
-				buildCommand: "npm run build"
+				buildCommand: "npm run build",
+				synthCommand: "cdk synth --context stageName=prod"
 			})
 		});
 
-		const deploy = new WorkshopPipelineStage(this, "Deploy");
+		const deployProd = new WorkshopPipelineStage(this, "DeployProd");
 
-		pipeline.addApplicationStage(deploy);
+		pipelineProd.addApplicationStage(deployProd);
 	}
 }
