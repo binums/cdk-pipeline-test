@@ -3,8 +3,12 @@ import * as cdk from "@aws-cdk/core";
 import * as apigateway from "@aws-cdk/aws-apigateway";
 import { HitCounter } from "./hitCounter";
 import { TableViewer } from "cdk-dynamo-table-viewer";
+import { CfnOutput } from "@aws-cdk/core";
 
 export class CdkTsWorkshopStack extends cdk.Stack {
+	public readonly hcViewerUrl: cdk.CfnOutput;
+	public readonly hcEndpoint: cdk.CfnOutput;
+
 	constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
@@ -18,13 +22,21 @@ export class CdkTsWorkshopStack extends cdk.Stack {
 			downstream: hello
 		});
 
-		new apigateway.LambdaRestApi(this, "Endpoint", {
+		const gateway = new apigateway.LambdaRestApi(this, "Endpoint", {
 			handler: helloWithCounter.handler
 		});
 
-		new TableViewer(this, "ViewHitCounter", {
+		const tv = new TableViewer(this, "ViewHitCounter", {
 			title: "Hello Hits",
 			table: helloWithCounter.table
+		});
+
+		this.hcEndpoint = new CfnOutput(this, "GatewayUrl", {
+			value: gateway.url
+		});
+
+		this.hcEndpoint = new CfnOutput(this, "TableViewerUrl", {
+			value: tv.endpoint
 		});
 	}
 }
