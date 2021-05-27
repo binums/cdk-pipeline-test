@@ -12,30 +12,40 @@ export class CdkTsWorkshopStack extends cdk.Stack {
 	constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id, props);
 
-		const hello = new lambda.Function(this, "HelloHandler", {
+		const stageName = this.node.tryGetContext("stageName") || "dev";
+
+		const hello = new lambda.Function(this, `HelloHandler-${stageName}`, {
 			runtime: lambda.Runtime.NODEJS_12_X,
 			code: lambda.Code.fromAsset("lambda"),
 			handler: "hello.handler"
 		});
 
-		const helloWithCounter = new HitCounter(this, "HelloHitCounter", {
-			downstream: hello
-		});
+		const helloWithCounter = new HitCounter(
+			this,
+			`HelloHitCounter-${stageName}`,
+			{
+				downstream: hello
+			}
+		);
 
-		const gateway = new apigateway.LambdaRestApi(this, "Endpoint", {
-			handler: helloWithCounter.handler
-		});
+		const gateway = new apigateway.LambdaRestApi(
+			this,
+			`Endpoint-${stageName}`,
+			{
+				handler: helloWithCounter.handler
+			}
+		);
 
-		const tv = new TableViewer(this, "ViewHitCounter", {
+		const tv = new TableViewer(this, `ViewHitCounter-${stageName}`, {
 			title: "Hello Hits",
 			table: helloWithCounter.table
 		});
 
-		this.hcEndpoint = new CfnOutput(this, "GatewayUrl", {
+		this.hcEndpoint = new CfnOutput(this, `GatewayUrl-${stageName}`, {
 			value: gateway.url
 		});
 
-		this.hcEndpoint = new CfnOutput(this, "TableViewerUrl", {
+		this.hcEndpoint = new CfnOutput(this, `TableViewerUrl-${stageName}`, {
 			value: tv.endpoint
 		});
 	}
