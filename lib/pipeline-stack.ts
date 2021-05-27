@@ -9,16 +9,16 @@ export class WorkshopPipelineStack extends cdk.Stack {
 	constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
 		super(scope, id);
 
-		const sourceArtifact = new codepipeline.Artifact();
-		const cloudAssemblyArtifact = new codepipeline.Artifact();
+		const sourceArtifactDev = new codepipeline.Artifact();
+		const cloudAssemblyArtifactDev = new codepipeline.Artifact();
 
 		const pipelineDev = new CdkPipeline(this, "PipelineDev", {
 			pipelineName: "WorkshopPipelineDev",
-			cloudAssemblyArtifact,
+			cloudAssemblyArtifact: cloudAssemblyArtifactDev,
 
 			sourceAction: new codepipeline_actions.GitHubSourceAction({
 				actionName: "GitHub",
-				output: sourceArtifact,
+				output: sourceArtifactDev,
 				oauthToken: SecretValue.secretsManager(
 					"CDK-Pipeline-test-github-token"
 				),
@@ -28,8 +28,8 @@ export class WorkshopPipelineStack extends cdk.Stack {
 			}),
 
 			synthAction: SimpleSynthAction.standardNpmSynth({
-				sourceArtifact,
-				cloudAssemblyArtifact,
+				sourceArtifact: sourceArtifactDev,
+				cloudAssemblyArtifact: cloudAssemblyArtifactDev,
 				buildCommand: "npm run build",
 				synthCommand: "npx cdk synth --context stageName=dev"
 			})
@@ -39,13 +39,16 @@ export class WorkshopPipelineStack extends cdk.Stack {
 
 		pipelineDev.addApplicationStage(deployDev);
 
+		const sourceArtifactProd = new codepipeline.Artifact();
+		const cloudAssemblyArtifactProd = new codepipeline.Artifact();
+
 		const pipelineProd = new CdkPipeline(this, "PipelineProd", {
 			pipelineName: "WorkshopPipelineProd",
-			cloudAssemblyArtifact,
+			cloudAssemblyArtifact: cloudAssemblyArtifactProd,
 
 			sourceAction: new codepipeline_actions.GitHubSourceAction({
 				actionName: "GitHub",
-				output: sourceArtifact,
+				output: sourceArtifactProd,
 				oauthToken: SecretValue.secretsManager(
 					"CDK-Pipeline-test-github-token"
 				),
@@ -55,8 +58,8 @@ export class WorkshopPipelineStack extends cdk.Stack {
 			}),
 
 			synthAction: SimpleSynthAction.standardNpmSynth({
-				sourceArtifact,
-				cloudAssemblyArtifact,
+				sourceArtifact: sourceArtifactProd,
+				cloudAssemblyArtifact: cloudAssemblyArtifactProd,
 				buildCommand: "npm run build",
 				synthCommand: "npx cdk synth --context stageName=prod"
 			})
