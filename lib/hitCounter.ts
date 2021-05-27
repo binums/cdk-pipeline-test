@@ -14,8 +14,10 @@ export class HitCounter extends cdk.Construct {
 	constructor(scope: cdk.Construct, id: string, props: HitCounterProps) {
 		super(scope, id);
 
-		const table = new dynamodb.Table(this, "Hits", {
-			tableName: "Hits",
+		const stageName = this.node.tryGetContext("stageName") || "dev";
+
+		const table = new dynamodb.Table(this, `Hits-${stageName}`, {
+			tableName: `Hits-${stageName}`,
 			partitionKey: {
 				name: "path",
 				type: dynamodb.AttributeType.STRING
@@ -24,7 +26,7 @@ export class HitCounter extends cdk.Construct {
 
 		this.table = table;
 
-		this.handler = new lambda.Function(this, "HitCounterHandler", {
+		this.handler = new lambda.Function(this, `HitCounterHandler-${stageName}`, {
 			runtime: lambda.Runtime.NODEJS_12_X,
 			code: lambda.Code.fromAsset("lambda"),
 			handler: "hitCounter.handler",
