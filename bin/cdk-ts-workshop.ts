@@ -5,6 +5,6 @@ import { WorkshopPipelineStack } from "../lib/pipeline-stack";
 const app = new cdk.App();
 const stageName = app.node.tryGetContext("stageName") || "dev";
 
-new WorkshopPipelineStack(app, "CdkTsWorkshopPipelineStack", {
+new WorkshopPipelineStack(app, `CdkTsWorkshopPipelineStack-${stageName}`, {
 	stackName: `CdkTsWorkshopPipelineStack-${stageName}`
 });
